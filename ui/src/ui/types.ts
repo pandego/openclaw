@@ -513,6 +513,13 @@ export type SkillInstallOption = {
   bins: string[];
 };
 
+export type SkillCapability = "shell" | "filesystem" | "network" | "browser" | "sessions";
+
+export type SkillScanResult = {
+  severity: "clean" | "info" | "warn" | "critical";
+  findings: string[];
+};
+
 export type SkillStatusEntry = {
   name: string;
   description: string;
@@ -542,6 +549,8 @@ export type SkillStatusEntry = {
   };
   configChecks: SkillsStatusConfigCheck[];
   install: SkillInstallOption[];
+  capabilities: SkillCapability[];
+  scanResult?: SkillScanResult;
 };
 
 export type SkillStatusReport = {
@@ -556,6 +565,8 @@ export type HealthSnapshot = Record<string, unknown>;
 
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
+export type LogCategory = "security";
+
 export type LogEntry = {
   raw: string;
   time?: string | null;
@@ -563,4 +574,5 @@ export type LogEntry = {
   subsystem?: string | null;
   message?: string | null;
   meta?: Record<string, unknown> | null;
+  category?: LogCategory | null;
 };

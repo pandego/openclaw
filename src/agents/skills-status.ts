@@ -3,6 +3,7 @@ import type { OpenClawConfig } from "../config/config.js";
 import { resolveEmojiAndHomepage } from "../shared/entry-metadata.js";
 import { evaluateRequirementsFromMetadataWithRemote } from "../shared/requirements.js";
 import { CONFIG_DIR } from "../utils.js";
+import type { SkillCapability, SkillScanResult } from "./skills/types.js";
 import {
   hasBinary,
   isBundledSkillAllowed,
@@ -61,6 +62,8 @@ export type SkillStatusEntry = {
   };
   configChecks: SkillStatusConfigCheck[];
   install: SkillInstallOption[];
+  capabilities: SkillCapability[];
+  scanResult?: SkillScanResult;
 };
 
 export type SkillStatusReport = {
@@ -212,7 +215,8 @@ function buildSkillStatus(
       ),
     isConfigSatisfied: (pathStr) => isConfigPathTruthy(config, pathStr),
   });
-  const eligible = !disabled && !blockedByAllowlist && requirementsSatisfied;
+  const blockedByScan = entry.scanResult?.severity === "critical";
+  const eligible = !disabled && !blockedByAllowlist && !blockedByScan && requirementsSatisfied;
 
   return {
     name: entry.skill.name,
@@ -233,6 +237,8 @@ function buildSkillStatus(
     missing,
     configChecks,
     install: normalizeInstallOptions(entry, prefs ?? resolveSkillsInstallPreferences(config)),
+    capabilities: entry.metadata?.capabilities ?? [],
+    scanResult: entry.scanResult,
   };
 }
 

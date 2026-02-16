@@ -3,6 +3,7 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import { isPlainObject } from "../utils.js";
 import { normalizeToolName } from "./tool-policy.js";
+import { checkToolAgainstSkillPolicy } from "../security/skill-security-context.js";
 
 type HookContext = {
   agentId?: string;
@@ -24,6 +25,20 @@ export async function runBeforeToolCallHook(args: {
 }): Promise<HookOutcome> {
   const toolName = normalizeToolName(args.toolName || "tool");
   const params = args.params;
+
+  // Skill security enforcement — check before any plugin hooks.
+  // This is a hard code gate: no prompt injection can bypass it.
+  const skillPolicyBlock = checkToolAgainstSkillPolicy(toolName);
+  if (skillPolicyBlock) {
+    log.warn(`Tool blocked by skill policy: ${toolName}`, {
+      category: "security",
+      tool: toolName,
+      reason: skillPolicyBlock,
+      agentId: args.ctx?.agentId ?? null,
+      sessionKey: args.ctx?.sessionKey ?? null,
+    });
+    return { blocked: true, reason: skillPolicyBlock };
+  }
 
   const hookRunner = getGlobalHookRunner();
   if (!hookRunner?.hasHooks("before_tool_call")) {

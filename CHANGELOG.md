@@ -6,6 +6,8 @@ Docs: https://docs.openclaw.ai
 
 ### Changes
 
+- Skills/Security: defense-in-depth security hardening for community skills (ClawHub installs). Adds capability declarations (`shell`, `filesystem`, `network`, `browser`, `sessions`), trust tier classification (builtin/verified/community/local), SKILL.md content scanning (blocks prompt injection, capability inflation, boundary spoofing), skill-aware tool policy enforcement (denies undeclared dangerous tools for community skills), command-dispatch gating, and before-tool-call audit monitoring with session context. Community skills that fail critical scanning are blocked from loading. `openclaw skills list/info/check` now show capabilities, trust tiers, scan results, and runtime policy.
+- Skills/Logging: all security-related log entries tagged with `category: "security"` for filtering. Skills CLI commands output structured JSON to the file logger (no more ASCII tables in logs). Web UI Logs tab adds a "Security" filter chip for security-only event views.
 - Subagents: nested sub-agents (sub-sub-agents) with configurable depth. Set `agents.defaults.subagents.maxSpawnDepth: 2` to allow sub-agents to spawn their own children. Includes `maxChildrenPerAgent` limit (default 5), depth-aware tool policy, and proper announce chain routing. (#14447) Thanks @tyler6204.
 
 ### Fixes

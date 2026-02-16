@@ -2,10 +2,12 @@ import type { Skill } from "@mariozechner/pi-coding-agent";
 import type {
   OpenClawSkillMetadata,
   ParsedSkillFrontmatter,
+  SkillCapability,
   SkillEntry,
   SkillInstallSpec,
   SkillInvocationPolicy,
 } from "./types.js";
+import { SKILL_CAPABILITIES } from "./types.js";
 import { parseFrontmatterBlock } from "../../markdown/frontmatter.js";
 import {
   getFrontmatterString,
@@ -108,7 +110,19 @@ export function resolveOpenClawMetadata(
         }
       : undefined,
     install: install.length > 0 ? install : undefined,
+    capabilities: parseCapabilities(metadataObj.capabilities),
   };
+}
+
+function parseCapabilities(raw: unknown): SkillCapability[] | undefined {
+  const list = normalizeStringList(raw);
+  if (list.length === 0) {
+    return undefined;
+  }
+  const valid = list.filter((v): v is SkillCapability =>
+    (SKILL_CAPABILITIES as readonly string[]).includes(v),
+  );
+  return valid.length > 0 ? valid : undefined;
 }
 
 export function resolveSkillInvocationPolicy(
