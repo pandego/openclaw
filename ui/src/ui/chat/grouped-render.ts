@@ -28,7 +28,9 @@ function extractImages(message: unknown): ImageBlock[] {
   }
 
   for (const block of content) {
-    if (typeof block !== "object" || block === null) continue;
+    if (typeof block !== "object" || block === null) {
+  continue;
+}
     const b = block as Record<string, unknown>;
 
     if (b.type === "image") {
