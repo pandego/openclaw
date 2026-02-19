@@ -41,6 +41,25 @@ function extractImages(message: unknown): ImageBlock[] {
           images.push({ url });
         } else if (typeof b.url === "string") {
           images.push({ url: b.url });
+      if (b.type === "image") {
+        // Handle direct data/mimeType format (from tool results)
+        if (typeof b.data === "string" && b.data) {
+          const mimeType = (b.mimeType as string) || "image/png";
+          const url = b.data.startsWith("data:") ? b.data : `data:${mimeType};base64,${b.data}`;
+          images.push({ url });
+        }
+        // Handle source object format (from sendChatMessage)
+        else {
+          const source = b.source as Record<string, unknown> | undefined;
+          if (source?.type === "base64" && typeof source.data === "string") {
+            const data = source.data;
+            const mediaType = (source.media_type as string) || "image/png";
+            // If data is already a data URL, use it directly
+            const url = data.startsWith("data:") ? data : `data:${mediaType};base64,${data}`;
+            images.push({ url });
+          } else if (typeof b.url === "string") {
+            images.push({ url: b.url });
+          }
         }
       } else if (b.type === "image_url") {
         // OpenAI format
