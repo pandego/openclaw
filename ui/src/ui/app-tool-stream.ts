@@ -55,6 +55,10 @@ function extractToolOutputText(value: unknown): string | null {
       if (entry.type === "text" && typeof entry.text === "string") {
         return entry.text;
       }
+      if (entry.type === "image") {
+        const mimeType = typeof entry.mimeType === "string" ? entry.mimeType : "image/png";
+        return `[image: ${mimeType}]`;
+      }
       return null;
     })
     .filter((part): part is string => Boolean(part));
