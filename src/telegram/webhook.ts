@@ -80,6 +80,9 @@ export async function startTelegramWebhook(opts: {
     if (diagnosticsEnabled) {
       logWebhookReceived({ channel: "telegram", updateType: "telegram-post" });
     }
+    // Register grammy's request listeners first so early chunks are not missed
+    // during startup; then enforce body-size/timeout guard in parallel.
+    const handled = handler(req, res);
     const guard = installRequestBodyLimitGuard(req, res, {
       maxBytes: TELEGRAM_WEBHOOK_MAX_BODY_BYTES,
       timeoutMs: TELEGRAM_WEBHOOK_BODY_TIMEOUT_MS,
@@ -88,7 +91,6 @@ export async function startTelegramWebhook(opts: {
     if (guard.isTripped()) {
       return;
     }
-    const handled = handler(req, res);
     if (handled && typeof handled.catch === "function") {
       void handled
         .then(() => {
