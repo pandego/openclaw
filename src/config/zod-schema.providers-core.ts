@@ -428,6 +428,7 @@ export const DiscordAccountSchema = z
     streamMode: z.enum(["partial", "block", "off"]).optional(),
     draftChunk: BlockStreamingChunkSchema.optional(),
     maxLinesPerMessage: z.number().int().positive().optional(),
+    slowListenerThresholdMs: z.number().int().positive().optional(),
     mediaMaxMb: z.number().positive().optional(),
     retry: RetryConfigSchema,
     actions: z

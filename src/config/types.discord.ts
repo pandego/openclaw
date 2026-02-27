@@ -240,6 +240,8 @@ export type DiscordAccountConfig = {
    * keeps replies readable in-channel. Default: 17.
    */
   maxLinesPerMessage?: number;
+  /** Slow-listener warning threshold in milliseconds before EventQueue logs stalls. Default: 30000. */
+  slowListenerThresholdMs?: number;
   mediaMaxMb?: number;
   historyLimit?: number;
   /** Max DM turns to keep as history context. */

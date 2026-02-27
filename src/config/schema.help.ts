@@ -1386,6 +1386,8 @@ export const FIELD_HELP: Record<string, string> = {
   "channels.discord.retry.maxDelayMs": "Maximum retry delay cap in ms for Discord outbound calls.",
   "channels.discord.retry.jitter": "Jitter factor (0-1) applied to Discord retry delays.",
   "channels.discord.maxLinesPerMessage": "Soft max line count per Discord message (default: 17).",
+  "channels.discord.slowListenerThresholdMs":
+    "Slow-listener warning threshold in milliseconds before EventQueue logs stalls (default: 30000).",
   "channels.discord.threadBindings.enabled":
     "Enable Discord thread binding features (/focus, bound-thread routing/delivery, and thread-bound subagent sessions). Overrides session.threadBindings.enabled when set.",
   "channels.discord.threadBindings.idleHours":

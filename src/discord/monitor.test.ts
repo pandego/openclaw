@@ -181,6 +181,35 @@ describe("DiscordMessageListener", () => {
       vi.useRealTimers();
     }
   });
+
+  it("honors custom slow listener threshold", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+
+    try {
+      const deferred = createDeferred();
+      const handler = vi.fn(() => deferred.promise);
+      const logger = {
+        warn: vi.fn(),
+        error: vi.fn(),
+      } as unknown as ReturnType<typeof import("../logging/subsystem.js").createSubsystemLogger>;
+      const listener = new DiscordMessageListener(handler, logger, 60_000);
+
+      const handlePromise = listener.handle(
+        {} as unknown as import("./monitor/listeners.js").DiscordMessageEvent,
+        {} as unknown as import("@buape/carbon").Client,
+      );
+      await expectPending(handlePromise);
+
+      vi.setSystemTime(40_000);
+      deferred.resolve();
+      await handlePromise;
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe("discord allowlist helpers", () => {
