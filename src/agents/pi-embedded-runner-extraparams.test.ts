@@ -877,4 +877,71 @@ describe("applyExtraParamsToAgent", () => {
       expect(run().store).toBe(false);
     },
   );
+
+  it("defaults openai-codex transport to sse when proxy env is set", () => {
+    const { calls, agent } = createOptionsCaptureAgent();
+    const originalHttpsProxy = process.env.HTTPS_PROXY;
+    process.env.HTTPS_PROXY = "http://127.0.0.1:7890";
+
+    try {
+      applyExtraParamsToAgent(agent, undefined, "openai-codex", "gpt-5.3-codex");
+
+      const model = {
+        api: "openai-codex-responses",
+        provider: "openai-codex",
+        id: "gpt-5.3-codex",
+      } as Model<"openai-codex-responses">;
+      const context: Context = { messages: [] };
+      void agent.streamFn?.(model, context, {});
+
+      expect(calls).toHaveLength(1);
+      expect((calls[0] as Record<string, unknown>)?.transport).toBe("sse");
+    } finally {
+      if (originalHttpsProxy === undefined) {
+        delete process.env.HTTPS_PROXY;
+      } else {
+        process.env.HTTPS_PROXY = originalHttpsProxy;
+      }
+    }
+  });
+
+  it("does not override explicit openai-codex transport config", () => {
+    const { calls, agent } = createOptionsCaptureAgent();
+    const originalHttpsProxy = process.env.HTTPS_PROXY;
+    process.env.HTTPS_PROXY = "http://127.0.0.1:7890";
+
+    try {
+      const cfg = {
+        agents: {
+          defaults: {
+            models: {
+              "openai-codex/gpt-5.3-codex": {
+                params: {
+                  transport: "auto",
+                },
+              },
+            },
+          },
+        },
+      };
+      applyExtraParamsToAgent(agent, cfg, "openai-codex", "gpt-5.3-codex");
+
+      const model = {
+        api: "openai-codex-responses",
+        provider: "openai-codex",
+        id: "gpt-5.3-codex",
+      } as Model<"openai-codex-responses">;
+      const context: Context = { messages: [] };
+      void agent.streamFn?.(model, context, {});
+
+      expect(calls).toHaveLength(1);
+      expect((calls[0] as Record<string, unknown>)?.transport).toBe("auto");
+    } finally {
+      if (originalHttpsProxy === undefined) {
+        delete process.env.HTTPS_PROXY;
+      } else {
+        process.env.HTTPS_PROXY = originalHttpsProxy;
+      }
+    }
+  });
 });

@@ -175,6 +175,15 @@ function isAnthropicBedrockModel(modelId: string): boolean {
   return normalized.includes("anthropic.claude") || normalized.includes("anthropic/claude");
 }
 
+function hasProxyEnv(): boolean {
+  return Boolean(
+    process.env.HTTPS_PROXY ||
+    process.env.https_proxy ||
+    process.env.HTTP_PROXY ||
+    process.env.http_proxy,
+  );
+}
+
 function createBedrockNoCacheWrapper(baseStreamFn: StreamFn | undefined): StreamFn {
   const underlying = baseStreamFn ?? streamSimple;
   return (model, context, options) =>
@@ -679,6 +688,13 @@ export function applyExtraParamsToAgent(
         )
       : undefined;
   const merged = Object.assign({}, extraParams, override);
+
+  // Proxy environments often block/alter WebSocket upgrades.
+  // For Codex responses, prefer SSE unless user explicitly configured transport.
+  if (provider === "openai-codex" && merged.transport === undefined && hasProxyEnv()) {
+    merged.transport = "sse";
+  }
+
   const wrappedStreamFn = createStreamFnWithExtraParams(agent.streamFn, merged, provider);
 
   if (wrappedStreamFn) {
