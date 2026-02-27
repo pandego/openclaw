@@ -348,11 +348,18 @@ describe("runEmbeddedPiAgent", () => {
         message?.role === "user" &&
         textFromContent(message.content) === "first turn should persist",
     );
+    const syntheticAssistantIndex = messages.findIndex(
+      (message, index) =>
+        index > failedUserIndex &&
+        message?.role === "assistant" &&
+        (message as { stopReason?: string }).stopReason === "error",
+    );
     const followUpUserIndex = messages.findIndex(
       (message) => message?.role === "user" && textFromContent(message.content) === "follow-up",
     );
     expect(failedUserIndex).toBeGreaterThanOrEqual(0);
-    expect(followUpUserIndex).toBeGreaterThan(failedUserIndex);
+    expect(syntheticAssistantIndex).toBeGreaterThan(failedUserIndex);
+    expect(followUpUserIndex).toBeGreaterThan(syntheticAssistantIndex);
   });
 
   it("repairs orphaned user messages and continues", async () => {

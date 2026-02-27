@@ -112,6 +112,16 @@ vi.mock("../../cli/outbound-send-deps.js", () => ({
 vi.mock("../../config/sessions.js", () => ({
   resolveAgentMainSessionKey: vi.fn().mockReturnValue("main:default"),
   resolveSessionTranscriptPath: vi.fn().mockReturnValue("/tmp/transcript.jsonl"),
+  setSessionRuntimeModel: vi.fn(
+    (entry: Record<string, unknown>, runtime: { provider?: string; model?: string }) => {
+      if (runtime.provider) {
+        entry.modelProvider = runtime.provider;
+      }
+      if (runtime.model) {
+        entry.model = runtime.model;
+      }
+    },
+  ),
   updateSessionStore: vi.fn().mockResolvedValue(undefined),
 }));
 
