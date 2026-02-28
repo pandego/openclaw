@@ -40,6 +40,8 @@ describe("minimax-portal implicit provider", () => {
       });
 
       expect(providers).toBeDefined();
+      expect(providers?.["minimax-portal"]).toBeDefined();
+      expect(providers?.["minimax-portal"]?.models?.length).toBeGreaterThan(0);
       expect(providers?.["minimax-portal"]?.apiKey).toBeUndefined();
     } finally {
       fs.rmSync(agentDir, { recursive: true, force: true });

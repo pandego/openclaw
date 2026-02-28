@@ -863,13 +863,12 @@ export async function resolveImplicitProviders(params: {
   }
 
   const minimaxOauthProfile = listProfilesForProvider(authStore, "minimax-portal");
-  if (
-    minimaxOauthProfile.length > 0 &&
-    !hasConfiguredApiKey(params.explicitProviders?.["minimax-portal"])
-  ) {
+  if (minimaxOauthProfile.length > 0) {
     providers["minimax-portal"] = {
       ...buildMinimaxPortalProvider(),
-      apiKey: MINIMAX_OAUTH_PLACEHOLDER,
+      ...(hasConfiguredApiKey(params.explicitProviders?.["minimax-portal"])
+        ? {}
+        : { apiKey: MINIMAX_OAUTH_PLACEHOLDER }),
     };
   }
 
