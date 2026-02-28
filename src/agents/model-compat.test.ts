@@ -100,6 +100,40 @@ describe("normalizeModelCompat — Anthropic baseUrl", () => {
   });
 });
 
+describe("normalizeModelCompat — OpenAI-compatible baseUrl", () => {
+  it("strips trailing /chat/completions from openai-completions baseUrl", () => {
+    const model = {
+      ...baseModel(),
+      provider: "n1n",
+      api: "openai-completions" as Api,
+      baseUrl: "https://api.n1n.ai/v1/chat/completions",
+    };
+    const normalized = normalizeModelCompat(model);
+    expect(normalized.baseUrl).toBe("https://api.n1n.ai/v1");
+  });
+
+  it("strips trailing /chat/completions/ with slash", () => {
+    const model = {
+      ...baseModel(),
+      provider: "n1n",
+      api: "openai-completions" as Api,
+      baseUrl: "https://api.n1n.ai/v1/chat/completions/",
+    };
+    const normalized = normalizeModelCompat(model);
+    expect(normalized.baseUrl).toBe("https://api.n1n.ai/v1");
+  });
+
+  it("does not strip /chat/completions for non-openai adapters", () => {
+    const model = {
+      ...baseModel(),
+      api: "openai-responses" as Api,
+      baseUrl: "https://api.example.com/v1/chat/completions",
+    };
+    const normalized = normalizeModelCompat(model);
+    expect(normalized.baseUrl).toBe("https://api.example.com/v1/chat/completions");
+  });
+});
+
 describe("normalizeModelCompat", () => {
   it("forces supportsDeveloperRole off for z.ai models", () => {
     const model = baseModel();

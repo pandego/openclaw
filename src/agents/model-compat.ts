@@ -28,6 +28,20 @@ function isAnthropicMessagesModel(model: Model<Api>): model is Model<"anthropic-
 function normalizeAnthropicBaseUrl(baseUrl: string): string {
   return baseUrl.replace(/\/v1\/?$/, "");
 }
+
+/**
+ * pi-ai constructs OpenAI-compatible chat-completions requests as
+ * `${baseUrl}/chat/completions`.
+ *
+ * If users configure `baseUrl` as a full endpoint (e.g. `.../v1/chat/completions`),
+ * requests become `.../v1/chat/completions/chat/completions` and fail with 404.
+ *
+ * Strip one trailing `/chat/completions` segment so both base styles work.
+ */
+function normalizeOpenAiCompletionsBaseUrl(baseUrl: string): string {
+  return baseUrl.replace(/\/chat\/completions\/?$/i, "");
+}
+
 export function normalizeModelCompat(model: Model<Api>): Model<Api> {
   const baseUrl = model.baseUrl ?? "";
 
@@ -37,6 +51,13 @@ export function normalizeModelCompat(model: Model<Api>): Model<Api> {
     const normalised = normalizeAnthropicBaseUrl(baseUrl);
     if (normalised !== baseUrl) {
       return { ...model, baseUrl: normalised } as Model<"anthropic-messages">;
+    }
+  }
+
+  if (isOpenAiCompletionsModel(model) && baseUrl) {
+    const normalized = normalizeOpenAiCompletionsBaseUrl(baseUrl);
+    if (normalized !== baseUrl) {
+      return { ...model, baseUrl: normalized } as Model<"openai-completions">;
     }
   }
 
